@@ -1,0 +1,40 @@
+response_folder = zoho.workdrive.createFolder(nombre + " " + apellido,"qacyef339cf660f3442b9b2720712922d81c5","crm_workdrive");
+	id_folder = response_folder.get("data").get("id");
+	data_url = "{'data' : [{'url':'" + img_frente + "','name':'Imagen Frente.jpg'},  {'url':'" + img_izquierda + "','name':'Imagen Izquierda.jpg'},{'url':'" + img_derecha + "','name':'Imagen Derecha.jpg'},{'url':'" + img_atras + "','name':'Imagen Atras.jpg'},{'url':'" + img_interior + "','name':'Imagen Interior.jpg'}]}";
+	data = data_url.getJSON("data");
+	json_list = data.toJSONList();
+	for each  item in json_list
+	{
+		url_wp = item.getJSON("url");
+		name_img_wp = item.getJSON("name");
+		file_variable = invokeurl
+		[
+			url :url_wp
+			type :GET
+		];
+		response_sube_foto = zoho.workdrive.uploadFile(file_variable,id_folder,name_img_wp,false,"crm_workdrive");
+		data_foto = response_sube_foto.getJSON("data");
+		data_foto_json = data_foto.getJSON("attributes");
+		url_foto_zoho = data_foto_json.get("Permalink");
+		//id_list.add(item.getJSON("url"));
+		dataList = List();
+		data = Map();
+		data.put("$link_url",url_foto_zoho);
+		data.put("File_Name",name_img_wp);
+		data.put("$resource_id",id_lead);
+		data.put("$type","teamdrive");
+		dataList.add(data);
+		//dataList.add(data2);
+		//info dataList;
+		payload = "attachments=" + zoho.encryption.urlEncode({"data":dataList});
+		//info payload;
+		response = invokeurl
+		[
+			url :"https://www.zohoapis.com/crm/v2/Leads/" + id_lead + "/Attachments"
+			type :POST
+			parameters:payload
+			connection:"crm_colwagen"
+			content-type:"application/x-www-form-urlencoded"
+		];
+		//info response;
+	}
