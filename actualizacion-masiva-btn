@@ -1,0 +1,12 @@
+info id;
+idlead = id.toString();
+info idlead;
+idleadFinal = replaceAll(id,"|||",",",true);
+idleadFinal = idleadFinal.toJSONList();
+info idleadFinal;
+for each  idleaOnly in idleadFinal
+{
+	
+	info idleaOnly;		
+}
+return response;
