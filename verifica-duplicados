@@ -1,0 +1,37 @@
+//buscaLead = zoho.crm.searchRecords("Leads", "(Email:equals:"+correo+")");
+//info buscaLead;
+param = Map();
+param.put("sort_by","Created_Time");
+param.put("sort_order","asc");
+result = zoho.crm.searchRecords("Leads","(Email:equals:" + correo + ")",1,10,param);
+cantidad_lead = result.size();
+if(cantidad_lead < 2)
+{
+	info "No hay duplicados";
+}
+else
+{
+	info "Duplicado";
+	infoLeadOriginal = result.get(0).get("Full_Name");
+	telefonoLeadOriginal = result.get(0).get("Phone");
+	IdLeadOriginal = result.get(0).get("id");
+	propietarioLeadOriginal = result.get(0).get("Owner").get("email");
+	//info propietarioLeadOriginal;
+	response = invokeurl
+	[
+		url :"https://www.zohoapis.com/crm/v2/Leads/actions/add_tags?ids=" + IdLeadOriginal + ",&tag_names=Duplicado"
+		type :POST
+		connection:"crm_colraices"
+	];
+	info response;
+	sendmail
+	[
+		from :zoho.adminuserid
+		to :propietarioLeadOriginal
+		subject :"Lead Duplicado: " + infoLeadOriginal + ""
+		message :"Correo: " + correo + "<br>Nombre: " + infoLeadOriginal + "<br>Teléfono: " + telefonoLeadOriginal + "<br><a href='https://crm.zoho.com/crm/dasdasdas/tab/Leads/" + IdLeadOriginal + "'>Link Acceso Lead </a>"
+	]
+	IdLeadDuplicado = result.get(1).get("id");
+	borraLeadDuplicado = zoho.crm.invokeConnector("crm.delete",{"module":"Leads","id":IdLeadDuplicado});
+	info borraLeadDuplicado;
+}
