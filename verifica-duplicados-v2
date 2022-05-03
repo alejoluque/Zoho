@@ -1,0 +1,33 @@
+
+if(correo == "" && telefono != "")
+{
+	consultaLead = zoho.crm.searchRecords("Leads","(Phone:equals:" + telefono + ")");
+}
+//consulta lead por correo
+if(correo != "" && telefono == "")
+{
+	consultaLead = zoho.crm.searchRecords("Leads","(Email:equals:" + correo + ")");
+}
+//Consulta lead por correo o telefono
+if(correo != "" && telefono != "")
+{
+	//info "telefono y correo llenos";
+	consultaLead = zoho.crm.searchRecords("Leads","(Email:equals:" + correo + ") or (Phone:equals:" + telefono + ")");
+}
+//info consultaLead;
+//Condición si el lead existe
+if(consultaLead.isEmpty())
+{
+	info "Lead no existe";	
+// 	param = Map();
+// 	param.put("First_Name",nombre);
+
+// 	response = zoho.crm.createRecord("Leads",param,{"trigger":{"workflow","blueprint"},"lar_id":"5025035000001800001"});
+
+}
+else
+{
+	info "Lead Existe";
+// 	id_consultaLead = consultaLead.get(0).get("id");
+
+}
