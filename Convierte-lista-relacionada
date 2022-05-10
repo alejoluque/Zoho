@@ -1,0 +1,20 @@
+response = invokeurl
+[
+	url :"https://www.zohoapis.com/crm/v2/contactoRelXleads/search?word=" + id_lead + ""
+	type :GET
+	connection:"crm"
+];
+info response;
+listado_contactos = response.getJson("data");
+info listado_contactos;
+for each  record in listado_contactos
+{
+	id_contactoRelacionado = record.get("Contactos_relacionados_1").get("id");
+	//info id_contactoRelacionado;
+	data_map = Map();
+	data_map.put("Contactos_relacionados",id_contactoRelacionado);
+	data_map.put("Contacto_relacionado",id_contacto);
+	contacto_relaciona = zoho.crm.createRecord("ContRelacionadoXContacto",data_map);
+	info contacto_relaciona;
+}
+//info Lead ;
