@@ -1,5 +1,3 @@
-void webinar(string telefono, string correo, string webinar, string nombre, string apellido, string empresa, string cargo)
-{
 if(correo == "" && telefono != "")
 {
 	consultaLead = zoho.crm.searchRecords("Leads","(Phone:equals:" + telefono + ")");
@@ -25,117 +23,14 @@ consultaContacto2 = consultaContacto.isEmpty();
 if(consultaLead2 == true && consultaContacto2 == true)
 {
 	info "Lead y contacto no existe";
-	param = Map();
-	param.put("First_Name",nombre);
-	param.put("Last_Name",apellido);
-	param.put("Email",correo);
-	param.put("Phone",telefono);
-	param.put("Company",empresa);
-	param.put("Cargo",cargo);
-	param.put("Lead_Source","Webinar DB");
-	param.put("Lead_Status","Lead");
-	creaLead = zoho.crm.createRecord("Leads",param,{"trigger":{"workflow","blueprint"}});
-	info creaLead;
-	creaLead = Map(creaLead);
-	leadid = creaLead.get("id");
-	response = invokeurl
-	[
-		url :"https://www.zohoapis.com/crm/v2/Webinars/search?word=" + webinar + ""
-		type :GET
-		connection:"crm_mk"
-	];
-	//info response;
-	nombreWebinar = response.getJson("data");
-	webinarGet = nombreWebinar.get(0);
-	idWebinar = webinarGet.get("id");
-	leadx = Map();
-	leadx.put("Posibles_Clientes",leadid);
-	leadx.put("Webinar",idWebinar);
-	leadxwebinar = zoho.crm.createRecord("WebinarXleads",leadx,{"trigger":{"workflow"}});
-	//leadxduplicado = Map(leadxduplicado);
-	//leadxduplicado_id = leadxduplicado.get("id");
-	//info leadxwebinar;
-	// 	param.put("City",ciudad);
-	// 	param.put("Sucursal",sucursal);
-	// 	param.put("Unidad_de_negocio",marca);
-	// 	param.put("Modelos",modelo);
-	// 	param.put("Tiempo_estimado_de_compra",tiempo_compra);
-	// 	param.put("Presupuesto_estimado",presupuesto);
-	// 	param.put("Quieres_comprar_Vender",comprar_vender);
-	// 	param.put("Necesitas_financiaci_n",financiacion);
-	// 	param.put("convenio_corporativo",convenio_corporativo);
-	// 	param.put("Lead_Status","Lead sin gestionar");
-	// 	param.put("Formulario",formulario);
-	// 	param.put("Lead_Source",utm_source);
-	// 	param.put("Fuente_Medio",utm_medium);
-	// 	param.put("Fuente_T_rmino",utm_term);
-	// 	param.put("Fuente_Campa_a",utm_campaign);
-	// 	param.put("$gclid",zc_gad);
-	// 	param.put("Motivo_de_contacto",motivo_contacto);
-	// 	param.put("Description",mensaje);
-	// 	param.put("Placa",placa);
-	// 	param.put("Donde_deseas_ser_atendido",atendido);
-	// 	param.put("Creditos_interesado",credito_interesado);
-	// 	param.put("Lugar_test_drive",lugar_test);
-	// 	param.put("Fecha_hora_test_drive",guarda_fecha_test);
-	// 	param.put("Capacidad_veh_culo",capacidad);
-	// 	param.put("Tiene_cami_n",tiene_camion);
-	// 	param.put("Agencia_Publicidad",agencia);
-	// 	param.put("Marca_del_veh_culo_para_retoma",marcaRetoma);
-	// 	param.put("L_nea_del_veh_culo",lineaVehiculo);
-	// 	param.put("Kilometraje",kilometraje);
-	// 	param.put("Tipo_de_transmisi_n",transmision);
-	// 	param.put("Color_del_Veh_culo",color);
-	// 	param.put("A_o_Modelo",year_modelo);
-	// 	//info param;
-	// 	response = zoho.crm.createRecord("Leads",param,{"trigger":{"workflow","blueprint"});
-	// 	//info response;
-	// 	response = Map(response);
-	// 	leadid = response.get("id");
-	// 	info "ID Lead " + leadid;
 }
 else if(consultaContacto2 != true && consultaLead2 == true)
 {
 	info "Contacto Existe";
 	id_consultaContacto = consultaContacto.get(0).get("id");
-	response = invokeurl
-	[
-		url :"https://www.zohoapis.com/crm/v2/Webinars/search?word=" + webinar + ""
-		type :GET
-		connection:"crm_mk"
-	];
-	info response;
-	nombreWebinar = response.getJson("data");
-	webinarGet = nombreWebinar.get(0);
-	idWebinar = webinarGet.get("id");
-	leadx = Map();
-	leadx.put("Contactos",id_consultaContacto);
-	leadx.put("Webinar",idWebinar);
-	leadxwebinar = zoho.crm.createRecord("WebinarXcontactos",leadx,{"trigger":{"workflow"}});
-	//leadxduplicado = Map(leadxduplicado);
-	//leadxduplicado_id = leadxduplicado.get("id");
-	info leadxwebinar;
 }
 else if(consultaContacto2 == true && consultaLead2 != true)
 {
 	info "Lead Existe";
 	id_consultaLead = consultaLead.get(0).get("id");
-	response = invokeurl
-	[
-		url :"https://www.zohoapis.com/crm/v2/Webinars/search?word=" + webinar + ""
-		type :GET
-		connection:"crm_mk"
-	];
-	info response;
-	nombreWebinar = response.getJson("data");
-	webinarGet = nombreWebinar.get(0);
-	idWebinar = webinarGet.get("id");
-	leadx = Map();
-	leadx.put("Posibles_Clientes",id_consultaLead);
-	leadx.put("Webinar",idWebinar);
-	leadxwebinar = zoho.crm.createRecord("WebinarXleads",leadx,{"trigger":{"workflow"}});
-	//leadxduplicado = Map(leadxduplicado);
-	//leadxduplicado_id = leadxduplicado.get("id");
-	info leadxwebinar;
-}
 }
