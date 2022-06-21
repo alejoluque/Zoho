@@ -1,0 +1,26 @@
+response = zoho.crm.getRecordById("Leads",id);
+
+plantillaUrl = "https://www.zohoapis.com/crm/v3/settings/email_templates/ID_PLANTILLA";
+//info plantillaUrl;
+
+plantilla = invokeurl
+[
+	url:plantillaUrl
+	type: GET
+	connection: "crm"
+];
+contenidoCorreo = plantilla.get("email_templates").get(0).get("content");
+
+contenidoCorreo = contenidoCorreo.replaceAll("\$\{!Leads.First_Name\}",response.get("First_Name"));
+contenidoCorreo = contenidoCorreo.replaceAll("\$\{!Leads.Phone\}",response.get("Phone"));
+contenidoCorreo = contenidoCorreo.replaceAll("\$\{!Leads.Email\}",response.get("Email"));
+
+info contenidoCorreo ;
+
+sendmail
+[
+	from :zoho.adminuserid
+	to :"demos@demos.com"
+	subject :"Esto es una prueba"
+	message :contenidoCorreo
+]
