@@ -1,0 +1,37 @@
+leads = zoho.crm.getRecords("Campaigns",0,500,{"cvid":XXXXXXXXXXXXXXXXX});
+//info leads ;
+if(leads.isEmpty())
+{
+	info "Nada que importar";
+}
+else
+{
+	for each  rec in leads
+	{
+		idCampa = rec.get("id");
+		idCamp = idCampa.toLong();
+		//info idCamp;
+		campania = zoho.crm.getRecordById("Campaigns",idCamp);
+		coste_real = campania.get("Actual_Cost");
+		//info coste_real;
+		leads = zoho.crm.getRelatedRecords("Leads","Campaigns",idCamp);
+		contacts = zoho.crm.getRelatedRecords("Contacts","Campaigns",idCamp);
+		suma_leads = leads.size();
+		suma_contacts = contacts.size();
+		cantidad_total = suma_leads + suma_contacts;
+		if(cantidad_total == 0)
+		{
+			total_cpl = 0;
+			//info "no hay leads";
+		}
+		else
+		{
+			//info cantidad_total;
+			cpl = coste_real / cantidad_total;
+			total_cpl = cpl.toLong();
+		}
+		campos_ac = {"CPL":total_cpl};
+		actualiza = zoho.crm.updateRecord("Campaigns",idCamp,campos_ac);
+		info actualiza;
+	}
+}
