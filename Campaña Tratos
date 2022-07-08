@@ -1,0 +1,31 @@
+try 
+{
+	leadDetails = zoho.crm.getRecordById("Deals",TratoId);
+	campana = leadDetails.get("Fuente_campa_a");
+	//info campana;
+	response = invokeurl
+	[
+		url :"https://www.zohoapis.com/crm/v2/Campaigns/search?word=" + campana + ""
+		type :GET
+		connection:"crm"
+	];
+	//info response;
+	nombreCampana = response.getJson("data");
+	//nombreCampana = zoho.crm.searchRecords("Campaigns","(Campaign_Name:equals:" + campana + ")");
+	//info nombreCampana;
+	_crmdata = nombreCampana.get(0);
+	idCampana = _crmdata.get("id");
+	//info idCampana ;	
+	mp = Map();
+	mp.put("CAMPAIGNID",idCampana.toLong());
+	// 	actualiza = zoho.crm.updateRelatedRecord("Campaigns",idCampana.toLong(),"Deals",TratoId,mp);
+	actualiza = zoho.crm.updateRecord("Potentials",TratoId,{"Campaign_Source":idCampana});
+	//info actualiza;
+	// 	RecordCreate = zoho.crm.updateRecord("Leads",leadIdLong,{"Campa_a":idCampana});
+	// 	info idCampana;
+}
+catch (e)
+{
+	info "Ha ocurrido un error";
+	info e;
+}
