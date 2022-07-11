@@ -1,0 +1,22 @@
+
+	data = Map();
+	data.put("First_Name",nombre);
+	data.put("Last_Name",apellido);
+	data.put("Email",correo);
+	//info cursoInters.toList();
+	data.put("Country",PaisFinal);
+	data.put("City",ciudad);
+	data.put("Phone",telefono);
+	// 		data.put("Curso_de_Inter_s",cursoInters);
+	data.put("Cursos_de_inter_s",cursoInters.toList());
+	data.put("Description",comentarios);
+	data.put("Lead_Source",utm_source);
+	data.put("Fuente_de_campa_a",utm_campaign);
+	data.put("Lead_Status","Inicial (Blanco)");
+	data.put("$gclid",zc_gad);
+	//info cursoInters;
+	// data.put( "utm_medium",utm_medium);
+	// ,data.put( "utm_content",utm_content);
+	//info "--------------";
+	creaLead = zoho.crm.createRecord("Leads",data,{"trigger":{"workflow"},"lar_id":"XXXXXXXXXXXXXXXX"});
+	info creaLead;
