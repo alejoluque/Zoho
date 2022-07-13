@@ -24,3 +24,13 @@ sendmail
 	subject :"Esto es una prueba"
 	message :contenidoCorreo
 ]
+
+//enviar correo api
+response = invokeurl
+	[
+		url :"https://www.zohoapis.com/crm/v2.1/Leads/" + idLead + "/actions/send_mail"
+		type :POST
+		parameters:correo_datos + ""
+		connection:"crm_colwagen"
+	];
+	info response;
