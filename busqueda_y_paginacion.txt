@@ -1,0 +1,56 @@
+// ===============================================
+// =   Obtencion de primera paginacion y token   =
+// ===============================================
+
+allOportunities = invokeurl
+[
+	url :"https://www.zohoapis.com/crm/v3/Deals?fields=id,Campaign_Source,Campa_a_de_posible_cliente"
+	type :GET
+	connection:"crm_demosmk"
+];
+info allOportunities;
+
+// ===============================================
+// =   Token de siguiente pagina                 =
+// ===============================================
+
+pagination_info = allOportunities.get("info");
+info pagination_info;
+token = pagination_info.get("next_page_token");
+info token;
+
+// ===============================================
+// =          Obtencion de conteo global         =
+// ===============================================
+Recuento_oportunidades = invokeurl
+[
+	url :"https://www.zohoapis.com/crm/v2.1/Deals/actions/count"
+	type :GET
+	connection:"crm_demosmk"
+];
+recuento = Recuento_oportunidades.get("count");
+veces = recuento / 200;
+info veces.round(0);
+veces = veces.round(0) - 1;
+iterationString = "".leftPad(veces).replaceAll(" ",",").toList().subList(0,veces);
+
+// ===============================================
+// =         Token temporal de iteracion         =
+// ===============================================
+
+tokenTemp = token;
+for each  el in iterationString
+{
+	allOportunitiesTemp = invokeurl
+	[
+		url :"https://www.zohoapis.com/crm/v3/Deals?fields=id,Campaign_Source,Campa_a_de_posible_cliente&page_token=" + tokenTemp
+		type :GET
+		connection:"crm_demosmk"
+	];
+	info allOportunitiesTemp;
+	pagination_info = allOportunitiesTemp.get("info");
+	info pagination_info;
+	token = pagination_info.get("next_page_token");
+	tokenTemp = token;
+	info token;
+}
