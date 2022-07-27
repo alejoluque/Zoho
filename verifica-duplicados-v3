@@ -1,0 +1,113 @@
+//buscaLead = zoho.crm.searchRecords("Leads", "(Email:equals:"+correo+")");
+//info buscaLead;
+param = Map();
+param.put("sort_by","Created_Time");
+param.put("sort_order","asc");
+//result = zoho.crm.searchRecords("Leads","(Email:equals:" + correo + ")",1,10,param);
+if(correo == "" && telefono != "")
+{
+	consultaLead = zoho.crm.searchRecords("Leads","(Phone:equals:" + telefono + ")",1,10,param);
+	consultaContacto = zoho.crm.searchRecords("Contacts","(Phone:equals:" + telefono + ")",1,10,param);
+}
+//consulta lead por correo
+if(correo != "" && telefono == "")
+{
+	consultaLead = zoho.crm.searchRecords("Leads","(Email:equals:" + correo + ")",1,10,param);
+	consultaContacto = zoho.crm.searchRecords("Contacts","(Email:equals:" + correo + ")",1,10,param);
+}
+//Consulta lead por correo o telefono
+if(correo != "" && telefono != "")
+{
+	//info "telefono y correo llenos";
+	consultaLead = zoho.crm.searchRecords("Leads","(Email:equals:" + correo + ") or (Phone:equals:" + telefono + ")",1,10,param);
+	consultaContacto = zoho.crm.searchRecords("Contacts","(Email:equals:" + correo + ") or (Phone:equals:" + telefono + ")",1,10,param);
+}
+info consultaLead.size();
+info consultaContacto.size();
+if(consultaContacto.size() >= 1)
+{
+	// 	infoContactoOriginal = consultaContacto.get(0).get("Full_Name");
+	// 	telefonoContactoOriginal = consultaContacto.get(0).get("Phone");
+	// 	IdContactoOriginal = consultaContacto.get(0).get("id");
+	// 	propietarioContactoOriginal = consultaContacto.get(0).get("Owner").get("email");
+	info "existe contacto";
+	// aca se ejecuta el nevio de correo y asignacion de duplicado
+	IdLeadOriginal = consultaLead.get(0).get("id");
+	borraLeadDuplicado = zoho.crm.invokeConnector("crm.delete",{"module":"Leads","id":IdLeadOriginal});
+}
+else if(consultaLead.size() >= 2)
+{
+	infoLeadOriginal = consultaLead.get(0).get("Full_Name");
+	telefonoLeadOriginal = consultaLead.get(0).get("Phone");
+	IdLeadOriginal = consultaLead.get(0).get("id");
+	propietarioLeadOriginal = consultaLead.get(0).get("Owner").get("email");
+	info "Lead duplicado";
+	// 	response = invokeurl
+	// 	[
+	// 		url :"https://www.zohoapis.com/crm/v2/Leads/actions/add_tags?ids=" + IdLeadOriginal + ",&tag_names=Duplicado"
+	// 		type :POST
+	// 		connection:"crm"
+	// 	];
+	// 	info response;
+	// 	sendmail
+	// 	[
+	// 		from :zoho.adminuserid
+	// 		to :propietarioLeadOriginal
+	// 		subject :"Lead Duplicado: " + infoLeadOriginal + ""
+	// 		message :"Correo: " + correo + "<br>Nombre: " + infoLeadOriginal + "<br>Teléfono: " + telefonoLeadOriginal + "<br><a href='https://crm.zoho.com/crm/org723619817/tab/Leads/" + IdLeadOriginal + "'>Link Acceso Lead </a>"
+	// 	]
+	IdLeadDuplicado = consultaLead.get(1).get("id");
+	borraLeadDuplicado = zoho.crm.invokeConnector("crm.delete",{"module":"Leads","id":IdLeadDuplicado});
+	// 	info borraLeadDuplicado;
+}
+else if(consultaLead.size() <= 1)
+{
+	info "lead no esta duplicado";
+}
+//Condición si el lead existe
+// consultaLead2 = consultaLead.isEmpty();
+// consultaContacto2 = consultaContacto.isEmpty();
+// if(consultaLead2 == true && consultaContacto2 == true)
+// {
+// 	info "Lead y contacto no existe";
+// }
+// else if(consultaContacto2 != true && consultaLead2 == true)
+// {
+// 	info "Contacto Existe";
+// 	id_consultaContacto = consultaContacto.get(0).get("id");
+// }
+// else if(consultaContacto2 == true && consultaLead2 != true)
+// {
+// 	info "Lead Existe";
+// 	id_consultaLead = consultaLead.get(0).get("id");
+// 	}
+// if(cantidad_lead < 1)
+// {
+// 	info "No hay duplicados";
+// }
+// else
+// {
+// 	info "Duplicado";
+// 	infoLeadOriginal = result.get(0).get("Full_Name");
+// 	telefonoLeadOriginal = result.get(0).get("Phone");
+// 	IdLeadOriginal = result.get(0).get("id");
+// 	propietarioLeadOriginal = result.get(0).get("Owner").get("email");
+// 	//info propietarioLeadOriginal;
+// 	response = invokeurl
+// 	[
+// 		url :"https://www.zohoapis.com/crm/v2/Leads/actions/add_tags?ids=" + IdLeadOriginal + ",&tag_names=Duplicado"
+// 		type :POST
+// 		connection:"crm"
+// 	];
+// 	info response;
+// 	sendmail
+// 	[
+// 		from :zoho.adminuserid
+// 		to :propietarioLeadOriginal
+// 		subject :"Lead Duplicado: " + infoLeadOriginal + ""
+// 		message :"Correo: " + correo + "<br>Nombre: " + infoLeadOriginal + "<br>Teléfono: " + telefonoLeadOriginal + "<br><a href='https://crm.zoho.com/crm/org720687019/tab/Leads/" + IdLeadOriginal + "'>Link Acceso Lead </a>"
+// 	]
+// 	IdLeadDuplicado = result.get(1).get("id");
+// 	borraLeadDuplicado = zoho.crm.invokeConnector("crm.delete",{"module":"Leads","id":IdLeadDuplicado});
+// 	info borraLeadDuplicado;
+//}
