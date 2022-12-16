@@ -1,0 +1,256 @@
+
+//-----Extraccion de datos de empresa y cliente-----
+try 
+{
+	// 	info invoice;
+	invoiceNumber = invoice.get("invoice_number");
+	info invoiceNumber;
+	//-----Generacion de serie para la factura-----
+	serieFac = invoiceNumber.remove("INV-");
+	info serieFac;
+	id_trato_crm = invoice.get("zcrm_potential_id");
+	info id_trato_crm;
+	dataTrato_crm = zoho.crm.getRecordById("Deals",id_trato_crm);
+	dataEmpresaTrato = dataTrato_crm.get("Account_Name");
+	info dataEmpresaTrato;
+	idEmpresa = dataEmpresaTrato.get("id");
+	info idEmpresa;
+	dataEmpresa = zoho.crm.getRecordById("Accounts",idEmpresa);
+	Account_Name = dataEmpresa.get("Account_Name");
+	NIT = dataEmpresa.get("NIT");
+	Codigo_de_verificacion_NIT = dataEmpresa.get("Codigo_de_verificacion_NIT");
+	Billing_Street = dataEmpresa.get("Billing_Street");
+	Billing_City = dataEmpresa.get("Billing_City");
+	Departamento_de_facturaci_n = dataEmpresa.get("Departamento_de_facturaci_n");
+	Billing_Country = dataEmpresa.get("Billing_Country");
+	Phone = dataEmpresa.get("Phone");
+	Currency = dataEmpresa.get("Currency");
+	Correo_de_facturaci_n = dataEmpresa.get("Correo_de_facturaci_n");
+	//-----Obtencion de productos de la factura-----
+	line_items_fac = invoice.get("line_items");
+	info line_items_fac;
+}
+catch (e)
+{
+	sendmail
+	[
+		from :zoho.adminuserid
+		to :{"*****************"}
+		subject :"Error en la extracion de datos del cliente Factura Saphety"
+		message :"Error en la extracion de datos del cliente Factura Saphety <br><br>" + e
+	]
+}
+//-----Extracion de datos de la factura, productos, descuentos, y valor total-----
+//=========================================================
+//-----Proceso de conexion con sapetin-----
+//=========================================================
+fecha = zoho.currenttime;
+fecha = fecha.toString();
+CorrelationCode = fecha.unixEpoch("GMT-8");
+info CorrelationCode;
+body = Map();
+body.put("username","****************************");
+body.put("password","****************************");
+body.put("virtual_operator","*************");
+//-----Headers importantes, si no se agregan genera error-- ---
+header_data = Map();
+header_data.put("Content-Type","application/json");
+//-----Peticion para generar el token de autenticacion-----
+data_access_token = invokeurl
+[
+	url :"https://api-factura-electronica-co-qa.saphety.com/v2/auth/gettoken"
+	type :POST
+	parameters:body + ""
+	headers:header_data
+];
+//-----Extraccion del token y codigo de respuesta-----
+isValid = data_access_token.get("IsValid");
+if(isValid == "false")
+{
+	info "Error en la generacion del access token";
+	sendmail
+	[
+		from :zoho.adminuserid
+		to :{"**************","**************"}
+		subject :"Error en el proceso de facturacion Saphety"
+		message :"Hola admin, ha ocurrido un error en la generacion del access token de Saphety, por favor revise la funcion y realice pruebas <br> <br> <br>Error: " + data_access_token
+	]
+}
+else
+{
+	resultData = data_access_token.get("ResultData");
+	token = resultData.get("access_token");
+	info token;
+	try 
+	{
+		IssueDate = zoho.currenttime;
+		data = Map();
+		data.put("Currency","COP");
+		data.put("SeriePrefix","SETT");
+		data.put("SerieNumber",serieFac);
+		data.put("IssueDate",IssueDate);
+		data.put("DueDate",IssueDate);
+		data.put("DeliveryDate",IssueDate);
+		data.put("CorrelationDocumentId","POSTMAN-" + CorrelationCode);
+		data.put("SerieExternalKey","tmFWn1gaCg");
+		//-----Datos fiscales de la empresa que genera la factura, en este caso MK-----
+		IssuerParty = Map();
+		Identification = Map();
+		Identification.put("DocumentNumber","*********");
+		Identification.put("DocumentType","NIT");
+		Identification.put("CountryCode","CO");
+		Identification.put("CheckDigit","*********");
+		IssuerParty.put("Identification",Identification);
+		data.put("IssuerParty",IssuerParty);
+		//-----Datos de metodo de pago-----
+		PaymentMeans = List();
+		vencimiento = zoho.currentdate.toText("YYYY-MM-dd");
+		dataMeans = {"Code":"20","Mean":"1","DueDate":vencimiento};
+		PaymentMeans.add(dataMeans);
+		data.put("PaymentMeans",PaymentMeans);
+		//-----Datos fiscales de la empresa cliente-----
+		CustomerParty = Map();
+		CustomerParty.put("LegalType","Legal");
+		CustomerParty.put("Email",Correo_de_facturaci_n);
+		CustomerParty.put("TaxScheme","01");
+		ResponsabilityTypes = List();
+		ResponsabilityTypes.add("O-13");
+		CustomerParty.put("ResponsabilityTypes",ResponsabilityTypes);
+		Identification = Map();
+		Identification.put("DocumentNumber",NIT);
+		Identification.put("DocumentType","NIT");
+		Identification.put("CountryCode","CO");
+		Identification.put("CheckDigit",Codigo_de_verificacion_NIT);
+		CustomerParty.put("Name",Account_Name);
+		Address = Map();
+		Address.put("DepartmentCode","11");
+		Address.put("CityCode","11001");
+		Address.put("AddressLine",Billing_Street);
+		Address.put("Country","CO");
+		CustomerParty.put("Identification",Identification);
+		CustomerParty.put("Address",Address);
+		data.put("CustomerParty",CustomerParty);
+		//-----Informacion del producto-----
+		Lines = List();
+		//inicio del cliclo
+		contador = 0;
+		for each  pruducto in line_items_fac
+		{
+			contador = contador + 1;
+			quantity = pruducto.get("quantity");
+			item_total = pruducto.get("item_total");
+			name = pruducto.get("name");
+			purchase_rate = pruducto.get("purchase_rate");
+			dataLines = Map();
+			dataLines.put("Number",contador);
+			dataLines.put("Quantity",quantity);
+			dataLines.put("QuantityUnitOfMeasure","NAR");
+			TaxSubTotals = List();
+			dataTaxSubtotals = Map();
+			dataTaxSubtotals.put("TaxCategory","01");
+			dataTaxSubtotals.put("TaxPercentage","0");
+			dataTaxSubtotals.put("TaxableAmount","0");
+			dataTaxSubtotals.put("TaxAmount","0");
+			TaxSubTotals.add(dataTaxSubtotals);
+			dataLines.put("TaxSubTotals",TaxSubTotals);
+			TaxTotals = List();
+			dataTaxTotal = Map();
+			dataTaxTotal.put("TaxCategory","01");
+			dataTaxTotal.put("TaxAmount","0");
+			TaxTotals.add(dataTaxTotal);
+			dataLines.put("TaxTotals",TaxTotals);
+			dataLines.put("UnitPrice",purchase_rate);
+			dataLines.put("GrossAmount",item_total);
+			dataLines.put("NetAmount",item_total);
+			Item = Map();
+			// 			Item.put("Gtin","987654321");
+			Item.put("Description",name);
+			dataLines.put("Item",Item);
+			Lines.add(dataLines);
+		}
+		//finalizacion del ciclo
+		data.put("Lines",Lines);
+		TaxSubTotalsGlobal = List();
+		dataTaxSubTotalsGlobal = Map();
+		dataTaxSubTotalsGlobal.put("TaxCategory","01");
+		dataTaxSubTotalsGlobal.put("TaxPercentage","0");
+		dataTaxSubTotalsGlobal.put("TaxableAmount","0");
+		dataTaxSubTotalsGlobal.put("TaxAmount","0");
+		TaxSubTotalsGlobal.add(dataTaxSubTotalsGlobal);
+		data.put("TaxSubTotals",TaxSubTotalsGlobal);
+		TaxTotalsGlobal = List();
+		dataTaxTotals = Map();
+		dataTaxTotals.put("TaxCategory","01");
+		dataTaxTotals.put("TaxAmount","0");
+		TaxTotalsGlobal.add(dataTaxTotals);
+		data.put("TaxTotals",TaxTotalsGlobal);
+		total_neto = invoice.get("balance");
+		TotalGlobal = Map();
+		TotalGlobal.put("GrossAmount",total_neto);
+		TotalGlobal.put("TotalBillableAmount",total_neto);
+		TotalGlobal.put("PayableAmount",total_neto);
+		TotalGlobal.put("TaxableAmount",0);
+		data.put("Total",TotalGlobal);
+		info data;
+		data = data.toJsonList();
+	}
+	catch (e)
+	{
+		info e;
+		sendmail
+		[
+			from :zoho.adminuserid
+			to :{"****************"}
+			subject :"Error en el proceso de facturacion Saphety"
+			message :"Hola admin, ha ocurrido un error en el mapeo de datos de facturacion, por favor revise la funcion y realice pruebas <br> <br> <br>Error: " + e
+		]
+	}
+	//-----Envio de datos de facturacion a Saphety
+	try 
+	{
+		auth = "Bearer " + token;
+		header_data = Map();
+		header_data.put("Content-Type","application/json");
+		header_data.put("Authorization",auth);
+		sendDataToSaphety = invokeurl
+		[
+			url :"https://api-factura-electronica-co-qa.saphety.com/v2/saphety/outbounddocuments/salesInvoice"
+			type :POST
+			parameters:data + ""
+			headers:header_data
+		];
+		info sendDataToSaphety;
+		if(sendDataToSaphety.get("IsValid") == "false")
+		{
+			info "se envia el correo por error en la factura";
+			sendmail
+			[
+				from :zoho.adminuserid
+				to :{"**************"}
+				subject :"Error en el proceso de facturacion Saphety"
+				message :"Hola admin, ha ocurrido un error en la generacion de la factura enviada a saphetyy, por favor revise la funcion y realice pruebas <br> <br> <br>Error: " + sendDataToSaphety
+			]
+		}
+		else
+		{
+			ResultData = sendDataToSaphety.get("ResultData");
+			Id = ResultData.get("Id");
+			getDocumentPdf = invokeurl
+			[
+				url :"https://api-factura-electronica-co-qa.saphety.com/v2/saphety/outbounddocuments/" + Id + "/pdf/content"
+				type :GET
+				parameters:data + ""
+				headers:header_data
+			];
+			info getDocumentPdf;
+			response_sube_pdf = zoho.workdrive.uploadFile(getDocumentPdf,"***************","factura.pdf",false,"***********");
+			info response_sube_pdf;
+			info zoho.crm.attachFile("Deals",id_trato_crm,getDocumentPdf);
+		}
+	}
+	catch (e)
+	{
+		info e;
+	}
+}
+return dataEmpresa;
