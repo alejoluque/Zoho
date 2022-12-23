@@ -1,0 +1,75 @@
+
+/** 
+ * log("sample logging statement") --> can be used to print any data in the browser console.
+ * ZDK module can be used for customising the UI and other functionalities.
+ * return false to prevent <SAVE> action
+**/
+
+var departamento = ZDK.Page.getField('Departamento_de_facturacion_DIAN');
+var ciudad = ZDK.Page.getField('Billing_City');
+log(departamento)
+log(ciudad)
+
+
+var departamento_valor = departamento.getValue();
+var ciudad_valor = ciudad.getValue();
+log(departamento_valor);
+log(ciudad_valor);
+
+var codigoDepartamento = null;
+
+switch (departamento_valor) {
+    case "Amazonas": codigoDepartamento = "91"; break;
+    case "Antioquia": codigoDepartamento = "05"; break;
+    case "Arauca": codigoDepartamento = "81"; break;
+    case "Atlantico": codigoDepartamento = "08"; break;
+    case "Bogotá": codigoDepartamento = "11"; break;
+    case "Bolivar": codigoDepartamento = "13"; break;
+    case "Boyacá": codigoDepartamento = "15"; break;
+    case "Caldas": codigoDepartamento = "17"; break;
+    case "Caquetá": codigoDepartamento = "18"; break;
+    case "Casanare": codigoDepartamento = "85"; break;
+    case "Cauca": codigoDepartamento = "19"; break;
+    case "Cesar": codigoDepartamento = "20"; break;
+    case "Chocó": codigoDepartamento = "27"; break;
+    case "Córdoba": codigoDepartamento = "23"; break;
+    case "Cundinamarca": codigoDepartamento = "25"; break;
+    case "Guainía": codigoDepartamento = "94"; break;
+    case "Guaviare": codigoDepartamento = "95"; break;
+    case "Huila": codigoDepartamento = "41"; break;
+    case "La Guajira": codigoDepartamento = "44"; break;
+    case "Magdalena": codigoDepartamento = "47"; break;
+    case "Meta": codigoDepartamento = "50"; break;
+    case "Nariño": codigoDepartamento = "52"; break;
+    case "Norte de Santander": codigoDepartamento = "54"; break;
+    case "Putumayo": codigoDepartamento = "86"; break;
+    case "Quindío": codigoDepartamento = "63"; break;
+    case "Risaralda": codigoDepartamento = "66"; break;
+    case "San Andrés y Providencia": codigoDepartamento = "88"; break;
+    case "Santander": codigoDepartamento = "68"; break;
+    case "Sucre": codigoDepartamento = "70"; break;
+    case "Tolima": codigoDepartamento = "73"; break;
+    case "Valle del Cauca": codigoDepartamento = "76"; break;
+    case "Vaupés": codigoDepartamento = "97"; break;
+    case "Vichada": codigoDepartamento = "99"; break;
+}
+
+log(codigoDepartamento);
+
+var CodDepartamento = ZDK.Page.getField('Codigo_de_departamento');
+CodDepartamento.setValue(codigoDepartamento);
+var response = ZDK.Apps.CRM.Functions.execute("Busca_Codigo_de_ciudad", { "departamento": departamento_valor, "ciudad": ciudad_valor });
+log(response);
+
+var detalles = response.details;
+var userMessage = detalles?.userMessage[0];
+
+log(userMessage);
+if (userMessage.includes("Error")) {
+    log("se produce error");
+    ciudad.showError('La ciudad ingresada no es correcta, por favor revise el listado de ciudades alojado en workdrive');
+} else {
+
+    var CodDepartamento = ZDK.Page.getField('Codigo_de_ciudad');
+    CodDepartamento.setValue(userMessage);
+}
