@@ -1,0 +1,45 @@
+token = //token de acceso de la plataforma 
+phone = telFinal;
+channelId = //identificador del canal de whatsapp en woztell
+templateName = //nombre de la plantilla a enviar por webhook
+templateLanguage = "es_MX";
+post_in_zoho_cliq = true;
+bodyParameterList = List();
+// Comment this code if the template doesn't have parameters -------------------
+// bodyParameter1 = Map();
+// bodyParameter1.put("type","text");
+// bodyParameter1.put("text","parameter-1-value");
+// bodyParameterList.add(bodyParameter1);
+PostURL = "https://bot.api.woztell.com/sendResponses?accessToken=" + token;
+postMessage = Map();
+postMessage.put("channelId",channelId);
+postMessage.put("recipientId",phone);
+responseMap = Map();
+responseMap.put("type","TEMPLATE");
+responseMap.put("elementName",templateName);
+responseMap.put("languageCode",templateLanguage);
+componentsList = list();
+if(!bodyParameterList.isEmpty())
+{
+	bodyComponent = Map();
+	bodyComponent.put("type","body");
+	componentsList.add(bodyComponent);
+}
+responseMap.put("components",componentsList);
+responseList = List();
+responseList.add(responseMap);
+postMessage.put("response",responseList);
+message_meta = Map();
+message_meta_zoho = Map();
+// message_meta_zoho.put("user",function_tag); 
+message_meta_zoho.put("cliq",post_in_zoho_cliq);
+message_meta.put("zoho",message_meta_zoho);
+postMessage.put("meta",message_meta);
+info postMessage;
+response = invokeurl
+[
+	url :PostURL
+	type :POST
+	parameters:postMessage.toString()
+];
+info response;
