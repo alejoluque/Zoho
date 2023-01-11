@@ -1,0 +1,26 @@
+taskSubject = "Gestión Lead Duplicado";
+mp=map();
+mp.put("Subject",taskSubject);
+mp.put("Due_Date",today.toDate());
+mp.put("Owner",5025035000000330001);
+mp.put("What_Id",5025035000083497010);
+mp.put("$se_module","Leads");
+mp.put("Priority","Alto");
+mp.put("Tag","Duplicado");
+mp.put("Stage","Non commencé");
+createResp = zoho.crm.createRecord("Tasks", mp);
+
+info createResp;
+
+idTarea = createResp.get("id");
+
+nombre_tag = Map();
+nombre_tag.put("tag_names", "Duplicado");
+res = invokeurl
+[
+	url :"https://www.zohoapis.com/crm/v2/Tasks/"+idTarea+"/actions/add_tags?"
+	type :POST
+	parameters: nombre_tag
+	connection:"crm"
+];
+info res;
