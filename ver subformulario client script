@@ -1,0 +1,45 @@
+
+/** 
+ * log("sample logging statement") --> can be used to print any data in the browser console.
+ * ZDK module can be used for customising the UI and other functionalities.
+ * return false to prevent <SAVE> action
+**/
+
+var response = ZDK.Apps.CRM.Functions.execute("SegurosClientScriptConvierte", {"id": $Page.record_id});
+
+const selecciona = response.details.output;
+log(selecciona);
+const datos = JSON.parse(selecciona);
+
+// Convierte los datos en el formato deseado para list_options
+const opciones = datos.map(item => ({
+  actual_value: item[0],
+  display_value: item[1],
+}));
+
+// Configuración de entrada para el menú desplegable
+const inputConfig = [
+  {
+    type: 'picklist',
+    label: 'Seguro',
+    list_options: opciones, // Puedes establecer el valor predeterminado que desees aquí
+  },
+];
+
+// Llama a ZDK.Client.getInput con la configuración
+selecciona_seguro = ZDK.Client.getInput(inputConfig, 'Seleccione el seguro para crear el trato', 'Convertir', 'Cancelar');
+
+if (selecciona_seguro != undefined) {
+  //log(selecciona_seguro);
+
+  var id_cotizacion = selecciona_seguro[0];
+  log(id_cotizacion);
+  var response_convierte = ZDK.Apps.CRM.Functions.execute("SegurosClientScriptConvierte1", {"id_lead": $Page.record_id,"id_cotiza":id_cotizacion});
+    const datos_conversion = response_convierte.details.output;
+  log(datos_conversion);
+  $Client.refresh();
+
+} else {
+
+    log("No ha seleccionado ningun seguro");
+}
