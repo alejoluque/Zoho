@@ -1,0 +1,5 @@
+let buttons = ZDK.Page.getButtons();
+buttons.forEach(function(btn) {
+    var idBoton = btn.getId();
+
+});
